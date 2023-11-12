@@ -7,12 +7,12 @@
 
 - 安装
  
-```
+```bash
 go install github.com/QuietSugar/web-app-server@latest
 ```
 
 - 启动
 
- ``
+```bash
  github.com/QuietSugar/web-app-server -p 8080 -w .
 ```
