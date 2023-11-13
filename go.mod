@@ -1,4 +1,4 @@
-module github.com/zgs225/simple-server
+module github.com/QuietSugar/web-app-server
 
 go 1.16
 
