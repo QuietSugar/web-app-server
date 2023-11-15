@@ -12,7 +12,6 @@ import (
 )
 
 var (
-	port = flag.Int("p", getAnAvailablePort(), "Port of the server")
 	root = flag.String("w", ".", "Root dir of the server")
 )
 
@@ -23,45 +22,38 @@ func init() {
 var url string
 
 func main() {
+
 	a, err := filepath.Abs(*root)
 	if err != nil {
 		log.Fatal(err)
 	}
 	d := http.Dir(a)
 	fs := http.FileServer(d)
-	http.Handle("/", fs)
-	log.Printf("Web Server on :%d...\n", *port)
-	log.Printf("Web Server path :%s...\n", a)
+
+	// 创建一个新的多路复用器
+	mux := http.NewServeMux()
+
+	// 设置文件服务器处理器
+	mux.Handle("/", fs)
+
+	// 获取一个可用的随机端口
+	listener, err := net.Listen("tcp", "localhost:0")
+	if err != nil {
+		log.Fatal(err)
+	}
+	// 获取实际监听的端口
+	port := listener.Addr().(*net.TCPAddr).Port
+	fmt.Printf("文件服务器已启动，访问地址：http://127.0.0.1:%d\n", port)
 	go func() {
-		log.Println(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))
+		// 启动服务器
+		err = http.Serve(listener, mux)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}()
 	time.Sleep(time.Second)
-	url = fmt.Sprintf("http://localhost:%d", *port)
+	url = fmt.Sprintf("http://localhost:%d", port)
 	open.Run(url)
 	startTray()
-}
-
-func portCheck(port int) bool {
-	l, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
-	if err != nil {
-		return false
-	}
-	defer func(l net.Listener) {
-		err := l.Close()
-		if err != nil {
-			fmt.Println("Failed to Close Listener :", err)
-		}
-	}(l)
-	return true
-}
-
-func getAnAvailablePort() int {
-	startPort := 8080
-	endPort := 9080
-	for port := startPort; port <= endPort; port++ {
-		if portCheck(port) {
-			return port
-		}
-	}
-	return startPort
+	fmt.Println("HTTP 服务器已在随机端口", port, "上启动")
 }
