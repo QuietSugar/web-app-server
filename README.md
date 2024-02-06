@@ -7,7 +7,7 @@
 - 安装
 
 ```bash
-go install github.com/QuietSugar/web-app-server@latest
+go install  -ldflags -H=windowsgui github.com/QuietSugar/web-app-server@latest
 ```
 
 - 启动
