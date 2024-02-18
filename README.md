@@ -13,5 +13,8 @@ go install  -ldflags -H=windowsgui github.com/QuietSugar/web-app-server@latest
 - 启动
 
 ```bash
-web-app-server -p 8080 -w .
+# 指定路径
+./web-app-server -w .
+# 执行ico路径
+./web-app-server -i ./default.ico
 ```

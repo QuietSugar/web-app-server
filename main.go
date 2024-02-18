@@ -12,7 +12,8 @@ import (
 )
 
 var (
-	root = flag.String("w", ".", "Root dir of the server")
+	rootPath = flag.String("w", ".", "Root dir of the server")
+	icoPath  = flag.String("i", "", "ico的路径")
 )
 
 func init() {
@@ -22,12 +23,11 @@ func init() {
 var url string
 
 func main() {
-
-	a, err := filepath.Abs(*root)
+	rootAbsPath, err := filepath.Abs(*rootPath)
 	if err != nil {
 		log.Fatal(err)
 	}
-	d := http.Dir(a)
+	d := http.Dir(rootAbsPath)
 	fs := http.FileServer(d)
 
 	// 创建一个新的多路复用器
@@ -54,6 +54,7 @@ func main() {
 	time.Sleep(time.Second)
 	url = fmt.Sprintf("http://localhost:%d", port)
 	open.Run(url)
-	startTray()
+	w := &WebAppTray{icoPath}
+	w.start()
 	fmt.Println("HTTP 服务器已在随机端口", port, "上启动")
 }

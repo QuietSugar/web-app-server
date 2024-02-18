@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"github.com/energye/systray"
 	"github.com/energye/systray/icon"
@@ -10,15 +11,22 @@ import (
 	"time"
 )
 
-func startTray() {
+//go:embed default.ico
+var DefaultIco []byte
+
+type WebAppTray struct {
+	IconPath *string
+}
+
+func (w *WebAppTray) start() {
 	onExit := func() {
 		now := time.Now()
 		fmt.Println("Exit at", now.String())
 	}
-	systray.Run(onReady, onExit)
+	systray.Run(w.onReady, onExit)
 }
 
-func onReady() {
+func (w *WebAppTray) onReady() {
 	systray.SetTemplateIcon(icon.Data, icon.Data)
 	systray.SetTitle("Tray 托盘")
 	systray.SetTooltip("左键打开,右键退出")
@@ -28,13 +36,20 @@ func onReady() {
 	})
 	// 右键单击 - 退出
 	systray.SetOnRClick(func(menu systray.IMenu) { systray.Quit() })
+	w.setIco(w.IconPath)
 }
 
-func setIco(icoPath string) {
-	icoData, err := os.ReadFile(filepath.Join(icoPath))
-	if err != nil {
-		fmt.Println("Failed read ico :", err)
+func (w *WebAppTray) setIco(icoPath *string) {
+	if icoPath == nil || *icoPath == "" {
+		// 使用默认的图标
+		systray.SetIcon(DefaultIco)
 	} else {
-		systray.SetIcon(icoData)
+		// 使用自定义的ico图标
+		icoData, err := os.ReadFile(filepath.Join(*icoPath))
+		if err != nil {
+			fmt.Println("Failed read ico :", err)
+		} else {
+			systray.SetIcon(icoData)
+		}
 	}
 }
